@@ -1,0 +1,1 @@
+Optional actual screenshots can be placed here and referenced from components/portfolio/ProjectVisual.tsx. The existing previews are interface concepts, not screenshots.

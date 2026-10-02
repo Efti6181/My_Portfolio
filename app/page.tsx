@@ -1,0 +1,3 @@
+import Portfolio from '@/components/portfolio/Portfolio';
+import { profile } from '@/data/profile';
+export default function Page(){return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'Person',name:profile.name,jobTitle:'Computer Science & Engineering Student',url:profile.siteUrl,sameAs:[profile.github,profile.linkedin,profile.instagram,profile.facebook],worksFor:{'@type':'Organization',name:profile.employer},affiliation:{'@type':'CollegeOrUniversity',name:'Premier University Chittagong'},knowsAbout:['Artificial Intelligence','Machine Learning','Data Science','Software Engineering']}).replace(/</g,'\\u003c')}}/><Portfolio/></>}

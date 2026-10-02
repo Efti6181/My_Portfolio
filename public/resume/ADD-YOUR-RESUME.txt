@@ -1,0 +1,1 @@
+Place your real PDF here as Najmul-Alam-Efti-Resume.pdf. Then set profile.resume in data/profile.ts to /resume/Najmul-Alam-Efti-Resume.pdf.

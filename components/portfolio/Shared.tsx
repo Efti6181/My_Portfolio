@@ -1,0 +1,7 @@
+'use client';
+import { motion } from 'framer-motion';
+import { useReducedMotion } from '@/hooks/use-motion';
+import type { ReactNode, CSSProperties } from 'react';
+export function Reveal({children,className='',delay=0}:{children:ReactNode;className?:string;delay?:number}){const reduced=useReducedMotion();return <motion.div className={className} initial={reduced?false:{opacity:0,y:28}} whileInView={{opacity:1,y:0}} viewport={{once:true,margin:'0px 0px -35px 0px'}} transition={{duration:.65,delay,ease:[.16,1,.3,1]}}>{children}</motion.div>}
+export function Kicker({number,children}:{number:string;children:ReactNode}){return <div className="section-kicker"><span className="kicker-number">{number}</span><span className="tiny-line"/>{children}</div>}
+export function Tilt({children,className='',style}:{children:ReactNode;className?:string;style?:CSSProperties}){return <div className={className} style={style} onPointerMove={e=>{if(e.pointerType!=='mouse'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const r=e.currentTarget.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;e.currentTarget.style.setProperty('--tilt-x',`${-y*4}deg`);e.currentTarget.style.setProperty('--tilt-y',`${x*4}deg`);}} onPointerLeave={e=>{e.currentTarget.style.setProperty('--tilt-x','0deg');e.currentTarget.style.setProperty('--tilt-y','0deg');}}>{children}</div>}

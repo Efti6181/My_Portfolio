@@ -1,0 +1,19 @@
+'use client';
+import { useEffect, useRef } from 'react';
+import { useReducedMotion } from '@/hooks/use-motion';
+// CPU projection of the same abstract core. Keeps the composition intact without WebGL.
+export default function CoreFallback(){const canvas=useRef<HTMLCanvasElement>(null);const reduced=useReducedMotion();
+ useEffect(()=>{const el=canvas.current;if(!el)return;const ctx=el.getContext('2d');if(!ctx)return;let w=0,h=0,raf=0,visible=true;let phase=0;let last=0;const pointer={x:0,y:0};const parent=el.parentElement!;
+ const resize=()=>{w=parent.clientWidth;h=parent.clientHeight;const dpr=Math.min(devicePixelRatio,1.5);el.width=w*dpr;el.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw();};
+ const project=(x:number,y:number,z:number)=>{const a=phase*.07+pointer.x*.08,c=Math.cos(a),s=Math.sin(a);let xx=x*c+z*s,zz=-x*s+z*c;const b=.3+pointer.y*.07,yy=y*Math.cos(b)-zz*Math.sin(b);zz=y*Math.sin(b)+zz*Math.cos(b);const scale=Math.min(w,h)*.18;const f=6/(6-zz);return {x:w*.5+(xx*Math.cos(-.3)-yy*Math.sin(-.3))*scale*f,y:h*.48+(xx*Math.sin(-.3)+yy*Math.cos(-.3))*scale*f,z:zz};};
+ const line=(points:number[][],color:string,width=1)=>{ctx.beginPath();points.forEach((p,i)=>{const a=project(p[0],p[1],p[2]);if(i===0)ctx.moveTo(a.x,a.y);else ctx.lineTo(a.x,a.y);});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();};
+ function draw(){if(!ctx)return;ctx.clearRect(0,0,w,h);const scale=Math.min(w,h)*.18;const glow=ctx.createRadialGradient(w*.5,h*.48,0,w*.5,h*.48,scale*2);glow.addColorStop(0,'#a780ff20');glow.addColorStop(.5,'#784cd517');glow.addColorStop(1,'#32104100');ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
+ for(let k=0;k<17;k++){const lat=(k/16-.5)*Math.PI;const pts=[];for(let j=0;j<=90;j++){const t=j/90*Math.PI*2;pts.push([Math.cos(lat)*Math.cos(t)*1.6,Math.sin(lat)*1.6,Math.cos(lat)*Math.sin(t)*1.6]);}line(pts,'#a483dc40',.65);}
+ for(let k=0;k<25;k++){const a=k/25*Math.PI*2;const pts=[];for(let j=0;j<=80;j++){const t=j/80*Math.PI*2;pts.push([Math.cos(a)*Math.sin(t)*1.6,Math.cos(t)*1.6,Math.sin(a)*Math.sin(t)*1.6]);}line(pts,'#ba9ae549',.7);}
+ for(let k=0;k<12;k++){const pts=[];const shift=k*Math.PI*2/12;for(let j=0;j<=230;j++){const t=j/230*Math.PI*2;const r=1+.26*Math.cos(3*t+shift);pts.push([r*Math.cos(2*t),r*Math.sin(2*t),.55*Math.sin(3*t+shift)]);}line(pts,`rgba(185,142,250,${.2+k*.021})`,.75);}
+ for(let k=0;k<3;k++){const pts=[];for(let j=0;j<=160;j++){const t=j/160*Math.PI*2,r=2.1+k*.12;pts.push([Math.cos(t)*r,Math.sin(t)*r*Math.cos(.55+k*.7),Math.sin(t)*r*Math.sin(.55+k*.7)]);}line(pts,'#9675bd70',.65);const p=pts[Math.floor((phase*6+k*45)%160)];const pp=project(...p as [number,number,number]);ctx.beginPath();ctx.arc(pp.x,pp.y,2.3,0,Math.PI*2);ctx.shadowColor='#c7a3ff';ctx.shadowBlur=10;ctx.fillStyle='#dac4ff';ctx.fill();ctx.shadowBlur=0;}
+ for(let i=0;i<85;i++){const y=1-i/84*2,a=i*2.399963,r=Math.sqrt(1-y*y);const p=project(Math.cos(a)*r*2.65,y*2.65,Math.sin(a)*r*2.65);ctx.beginPath();ctx.arc(p.x,p.y,i%8===0?1.4:.6,0,Math.PI*2);ctx.fillStyle=i%8===0?'#d5bdff99':'#b497d766';ctx.fill();}}
+ const tick=(time:number)=>{if(visible&&!document.hidden&&!reduced&&time-last>33){phase+=.033;draw();last=time;}raf=requestAnimationFrame(tick);};
+ const move=(e:PointerEvent)=>{const r=el.getBoundingClientRect();pointer.x=(e.clientX-r.left)/r.width-.5;pointer.y=(e.clientY-r.top)/r.height-.5;};const obs=new ResizeObserver(resize);obs.observe(parent);const intersection=new IntersectionObserver(([e])=>{visible=e.isIntersecting;});intersection.observe(el);el.addEventListener('pointermove',move);resize();if(!reduced)raf=requestAnimationFrame(tick);return()=>{cancelAnimationFrame(raf);obs.disconnect();intersection.disconnect();el.removeEventListener('pointermove',move);};
+ },[reduced]);return <canvas ref={canvas} className="fallback-canvas" aria-hidden="true"/>;
+}
